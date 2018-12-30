@@ -9,6 +9,7 @@
   "author": "Phil Smith",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.16.4"
+    "express": "^4.16.4",
+    "sqlite3": "^4.0.4"
   }
 }
