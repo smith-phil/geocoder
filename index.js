@@ -2,8 +2,10 @@
 
 var express = require('express');
 var app = express();
-port = 3000;
+var port = 3000;
 
-routes = require('./routes/routes');
+var routes = require('./routes/routes');
+
+routes(app);
 
 app.listen(port);
