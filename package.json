@@ -1,0 +1,14 @@
+{
+  "name": "geocoder",
+  "version": "1.0.0",
+  "description": "Proof of concept geocoder for Irish addresses",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Phil Smith",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}
