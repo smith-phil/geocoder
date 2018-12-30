@@ -4,5 +4,6 @@ var express = require('express');
 var app = express();
 port = 3000;
 
-app.listen(port);
+routes = require('./routes/routes');
 
+app.listen(port);
