@@ -5,15 +5,15 @@
  */
 
 module.exports = (app) => {
-    var address = require('../controllers/address');
-
+    var addressController = require('../controllers/address');
+    var address = new addressController();
     app.route('/address')
-        .get(address.find_by_address);
+        .get(address.findByAddress);
 
     app.route('/townland')
-        .get(address.find_by_townland);
+        .get(address.findByTownland);
 
     app.route('/county')
-        .get(address.find_by_county);
+        .get(address.findByCounty);
     
 };

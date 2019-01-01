@@ -1,16 +1,45 @@
 'use strict';
 
-exports.find_by_address = (req,res) => {
-    // find by a full address
-    res.send('Find by full address called');
+
+function newaddress() 
+{
+    var addressModel = require('../models/addressModel');
+    var address = new addressModel('./db/geocode');
+
+    this.findByAddress = (req,res) => {
+        // find by a full address
+    
+        res.send('Find by full address called');
+    }
+
+    this.findByCounty = (req,res) => {
+        // find by a county   
+        let county = req.query.county;
+        address.getCounty(county, (result)=>{
+            if(result) {
+                res.status(200).json(result);
+            } else {
+                res.status(404);
+            }
+
+            
+        });
+    }
+
+    this.findByTownland = (req,res) => {
+        // find by a given townland
+        let townland = req.query.townland;
+        address.getTownland(townland, (result)=>{
+            
+            res.status(200).json(result);
+        });
+        
+    }
+
+
+    
+
 }
 
-exports.find_by_county = (req,res) => {
-    // find by a county   
-    res.send('Find by county called');
-}
 
-exports.find_by_townland = (req,res) => {
-    // find by a given townland
-    res.send('find by a given townland name');
-}
+module.exports=newaddress;
