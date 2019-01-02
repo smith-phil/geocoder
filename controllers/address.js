@@ -8,13 +8,15 @@ function newaddress()
 
     this.findByAddress = (req,res) => {
         // find by a full address
-    
+        address.getAddress(req.body.address, (result) => {
+            
+        });
         res.send('Find by full address called');
     }
 
     this.findByCounty = (req,res) => {
         // find by a county   
-        let county = req.query.county;
+        let county = req.params.county_name;
         address.getCounty(county, (result)=>{
             if(result) {
                 res.status(200).json(result);
@@ -28,16 +30,13 @@ function newaddress()
 
     this.findByTownland = (req,res) => {
         // find by a given townland
-        let townland = req.query.townland;
+        let townland = req.params.townland_name;
         address.getTownland(townland, (result)=>{
             
             res.status(200).json(result);
         });
         
     }
-
-
-    
 
 }
 

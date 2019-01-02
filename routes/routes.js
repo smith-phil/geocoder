@@ -8,12 +8,12 @@ module.exports = (app) => {
     var addressController = require('../controllers/address');
     var address = new addressController();
     app.route('/address')
-        .get(address.findByAddress);
+        .post(address.findByAddress);
 
-    app.route('/townland')
+    app.route('/townland/:townland_name')
         .get(address.findByTownland);
 
-    app.route('/county')
+    app.route('/county/:county_name')
         .get(address.findByCounty);
     
 };

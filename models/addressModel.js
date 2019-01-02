@@ -15,10 +15,11 @@ function newdb (pathToDb) {
     });
 
     /*
-     * function: executeGet
+     * Function: executeGet
      * executes a given query against the db
      * Args: query - the query to execute  
      *       callback - the callback method to pass the result set too
+     * Notes: the result in this case will only be the first record
      */
     var executeGet = (query, callback) => {
         db.serialize(()=> {
@@ -29,10 +30,11 @@ function newdb (pathToDb) {
     }
 
     /*
-     * function: executeGet
+     * Function: executeAll
      * executes a given query against the db
      * Args: query - the query to execute  
      *       callback - the callback method to pass the result set too
+     * Notes: the result set is all records find
      */
     var executeAll = (query, callback) => {
         db.serialize(()=> {
@@ -42,7 +44,8 @@ function newdb (pathToDb) {
         })
     }
 
-    /* function: getCounty 
+    /* 
+     * Function: getCounty 
      * Return the coordinates for a given county name, this can be multiple coordinates 
      * Arguments: county - the county name
      *            callback - the callback method to pass the result set too 
@@ -68,9 +71,30 @@ function newdb (pathToDb) {
             join CentroidTownland ct on c.CentroidId = ct.CentroidId 
             join Townland t on t.TownlandId = ct.TownlandId
             join County cty on t.CountyId = cty.CountyId
-            where t.English_Name = '${townland.toUpperCase()}'`
+            where t.English_Name = '${townland.toUpperCase()}'
+            order by cty.County`
         executeAll(query,callback);
     };
+
+    /*
+     * Function: getAddress
+     * Returns the coordinates for a given address
+     * Args: 
+    */
+    this.getAddress = (address, callback) => {
+        // split the address taking care of special characters like (, periods and ) are removed
+        var addElems = address.replace(/[.)]/g, "").replace("(",",").split(",");
+        
+        // get the county first, in a production ready application this would have to be validated
+        var county = addElems[addElems.length - 1]
+        var notFound = true;
+        var i = 0;
+        // for townland I'm taking a top down approach as this is more likely to give me a unique record, in theory :)
+        for(let i = 0; i < addElems.length - 1; i++) {
+
+        }
+    }
+
     this.all = (query) => {
         db.all(query, (err, rows) => {
 
