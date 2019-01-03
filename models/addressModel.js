@@ -67,7 +67,7 @@ function newdb (pathToDb) {
      *       callback - the callback method to pass the result set too 
      */
     this.getTownland = (townland, callback) => {
-        var query = `select Y AS latitude,X as longitude, t.English_Name as 'Townland', cty.County  from Centroid c 
+        var query = `select Y AS latitude,X as longitude, t.English_Name as 'Townland', cty.County from Centroid c 
             join CentroidTownland ct on c.CentroidId = ct.CentroidId 
             join Townland t on t.TownlandId = ct.TownlandId
             join County cty on t.CountyId = cty.CountyId
@@ -89,9 +89,10 @@ function newdb (pathToDb) {
         var county = addElems[addElems.length - 1]
         var notFound = true;
         var i = 0;
-        // for townland I'm taking a top down approach as this is more likely to give me a unique record, in theory :)
+        // for townland I'm taking a top down approach as this is more likely to give me a unique record
         for(let i = 0; i < addElems.length - 1; i++) {
-
+            var townland = addElems[i];
+            
         }
     }
 
