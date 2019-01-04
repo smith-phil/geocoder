@@ -7,13 +7,13 @@
 module.exports = (app) => {
     var addressController = require('../controllers/address');
     var address = new addressController();
-    app.route('/address')
+    app.route('/api/address')
         .post(address.findByAddress);
 
-    app.route('/townland/:townland_name')
+    app.route('/api/townland/:townland_name')
         .get(address.findByTownland);
 
-    app.route('/county/:county_name')
+    app.route('/api/county/:county_name')
         .get(address.findByCounty);
     
 };

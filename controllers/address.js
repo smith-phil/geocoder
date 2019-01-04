@@ -3,42 +3,56 @@
 
 function newaddress() 
 {
-    var addressModel = require('../models/addressModel');
-    var address = new addressModel('./db/geocode.sqlite3');
+    const addressModel = require('../models/addressModel');
+    const address = new addressModel('./db/geocode.sqlite3');
 
     this.findByAddress = (req,res) => {
-        // find by a full address
-        address.getAddress(req.body.address, (result) => {
-            if(result) {
+        
+        address.getAddress(req.body.address)
+            .then((result)=> {
                 res.status(200).json(result);
-            } else {
-                res.writeHead(404);
-            }
-
-        });
+            })
+            .catch((err)=> {
+                if(err.status = 404) {
+                    res.status(err.status).send(err.message);
+                } else {
+                    res.status(500).send('Internal Server error');
+                }
+            })
     }
 
     this.findByCounty = (req,res) => {
         // find by a county   
-        let county = req.params.county_name;
-        address.getCounty(county, (result)=>{
-            if(result) {
-                res.status(200).json(result);
-            } else {
-                res.status(404);
-            }
-
-        });
+        const county = req.params.county_name;
+        address.getCounty(county)
+            .then((result)=>{
+                res.status(200).json(result);    
+            })
+            .catch((error)=>{
+                if(error.status = 404) {
+                    res.status(error.status).send(error.message);
+                } else {
+                    res.status(500).send('Internal Server error');
+                }
+            })
     }
 
     this.findByTownland = (req,res) => {
         // find by a given townland
-        let townland = req.params.townland_name;
-        address.getTownland(townland, (result)=>{
-            res.status(200).json(result);
-        });
-        
+        const townland = req.params.townland_name;
+        address.getTownland(townland)
+            .then((result)=>{
+                res.status(200).json(result);    
+            })
+            .catch((error)=>{
+                if(error.status = 404) {
+                    res.status(error.status).send(error.message);
+                } else {
+                    res.status(500).send('Internal Server error');
+                }
+            })
     }
+    
 
 }
 

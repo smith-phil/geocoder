@@ -13,6 +13,7 @@ function newdb (pathToDb) {
             opened = true;
         }
     });
+    this.db = db;
 
     /*
      * Function: executeGet
@@ -21,28 +22,27 @@ function newdb (pathToDb) {
      *       callback - the callback method to pass the result set too
      * Notes: the result in this case will only be the first record
      */
-    var executeGet = (query, callback) => {
+    const executeGet = (query, callback) => {
         db.serialize(()=> {
            db.get(query, (err, row) => {
                 callback(row);
             });
-        })
+        });
     }
 
-    /*
-     * Function: executeAll
-     * executes a given query against the db
-     * Args: query - the query to execute  
-     *       callback - the callback method to pass the result set too
-     * Notes: the result set is all records find
-     */
-    var executeAll = (query, callback) => {
-        db.serialize(()=> {
-           db.all(query, (err, result) => {
-                callback(result);
+    const getAllAsync = function(query) {
+        return new Promise((resolve, reject) => {
+            db.serialize(()=>{
+                db.all(query, (err, result) => {
+                    if(err)
+                        reject(err);
+                    else 
+                        resolve(result);
+                })
             });
         })
     }
+
 
     /* 
      * Function: getCounty 
@@ -50,65 +50,109 @@ function newdb (pathToDb) {
      * Arguments: county - the county name
      *            callback - the callback method to pass the result set too 
     */
-    this.getCounty = (county, callback) => {
-        // Sql query to get X, Y coordinates for the given county name    
-        var query = `select Y AS latitude,X as longitude from Centroid c 
+    this.getCounty = (county) => {
+        return new Promise((resolve,reject)=> {
+            const query = `select Y AS latitude,X as longitude, ct.County from Centroid c 
             join CentroidCounty cc on c.CentroidId = cc.CentroidId 
             join County ct on cc.CountyId = ct.CountyId
-            where ct.County = '${county.toUpperCase()}'`;
-            
-        executeGet(query, callback);
+            where ct.County = '${county}'
+            COLLATE NOCASE`;
+            getAllAsync(query)
+                .then((result)=>{
+                    if(result){
+                        resolve(result);
+                    } else {
+                        reject({status:404,message:'Not Found'});
+                    }
+                })
+                .catch((error)=>{
+                    reject(error);
+                })
+        })
+       
     };
 
     /*
      * function: getTownland
      * Return the coordinates for a given townland name
      * Args: townland - the townland name
-     *       callback - the callback method to pass the result set too 
+     *       
      */
-    this.getTownland = (townland, callback) => {
-        var query = `select Y AS latitude,X as longitude, t.English_Name as 'Townland', cty.County from Centroid c 
-            join CentroidTownland ct on c.CentroidId = ct.CentroidId 
-            join Townland t on t.TownlandId = ct.TownlandId
-            join County cty on t.CountyId = cty.CountyId
-            where t.English_Name = '${townland.toUpperCase()}'
-            order by cty.County`
-        executeAll(query,callback);
+    this.getTownland = (townland) => {
+        return new Promise((resolve,reject) => {
+            const query = `select Y AS latitude,X as longitude, t.English_Name as 'Townland', cty.County from Centroid c 
+                join CentroidTownland ct on c.CentroidId = ct.CentroidId 
+                join Townland t on t.TownlandId = ct.TownlandId
+                join County cty on t.CountyId = cty.CountyId
+                where t.English_Name = '${townland}'
+                COLLATE NOCASE
+                OR t.Irish_Name = '${townland}'
+                COLLATE NOCASE
+                order by cty.County`
+            getAllAsync(query)
+                .then((result)=>{
+                    if(result){
+                        resolve(result);
+                    } else {
+                        reject({status:404,message:'Not Found'});
+                    }
+                })
+                .catch((error)=>{
+                    reject(error);
+                })
+        })
     };
 
     /*
      * Function: getAddress
-     * Returns the coordinates for a given address
-     * Args: 
+     * Returns a json object with the coordinates for a given address, the townland name for those coords, and the county
+     * Args: the address in question
     */
-    this.getAddress = (address, callback) => {
-        // split the address taking care of special characters like (, periods and ) are removed
-        var addElems = address.replace(/[.)]/g, "").replace("(",",").split(",");
-        // get the county first, in a production ready application this would have to be validated
-        var county = addElems[addElems.length - 1].trim();
-        var notFound = true;
-        var i = 0;
-        // for townland I'm taking a top down approach as this is more likely to give me a unique record
-        for(let i = 0; i < addElems.length - 1; i++) {
-         
-            var townland = addElems[i].trim();
-            // query is the SQL be executed (COLLATE NOCASE means the query is case insensitive)
-            var query = `select Y AS latitude,X as longitude, t.English_Name as 'Townland', cty.County from Centroid c 
-            join CentroidTownland ct on c.CentroidId = ct.CentroidId 
-            join Townland t on t.TownlandId = ct.TownlandId
-            join County cty on t.CountyId = cty.CountyId
-            where cty.County = '${county}'
-            COLLATE NOCASE
-            AND t.English_Name = '${townland}'
-            COLLATE NOCASE
-            OR t.Irish_Name = '${townland}'
-            COLLATE NOCASE
-            order by cty.County`; 
-            console.log(query);
-            executeAll(query, callback);
-            break;
-        }
+    this.getAddress = (address) => {
+        
+        return new Promise((resolve,reject)=> {
+            // split the address taking care of special characters like (, periods and ) are removed
+            const addElems = address.replace(/[.)]/g, "").replace("(",",").split(",");
+            // get the county first, in a production ready application this would have to be validated
+            const county = addElems[addElems.length - 1].trim();
+            const i = 0;
+
+            const selectTownland = (count) => {
+                const townland = addElems[count].trim();
+                // query is the SQL be executed (COLLATE NOCASE means the query is case insensitive)
+                const query = `select Y AS latitude,X as longitude, t.English_Name as 'Townland', cty.County from Centroid c 
+                join CentroidTownland ct on c.CentroidId = ct.CentroidId 
+                join Townland t on t.TownlandId = ct.TownlandId
+                join County cty on t.CountyId = cty.CountyId
+                where cty.County = '${county}'
+                COLLATE NOCASE
+                AND t.English_Name = '${townland}'
+                COLLATE NOCASE
+                OR t.Irish_Name = '${townland}'
+                COLLATE NOCASE
+                order by cty.County`; 
+                // get all async using a promise
+                getAllAsync(query).then((val)=>{
+                    if(!val) {
+                        if(count +1 < addElems.length) 
+                        {   // recurse through the elements of the address before county
+                            selectTownland(count +1 );
+                        } else {
+                            reject( {status:404, message:'Not Found'}); // return null
+                        }
+                    } else {
+                        resolve(val);
+                    }
+                })
+                .catch((error)=>{
+                    reject(error);
+                })
+            }
+            selectTownland(0 );
+        })
     }
+
+
 
     this.close = () => {
             db.close();
