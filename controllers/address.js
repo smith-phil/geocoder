@@ -4,14 +4,18 @@
 function newaddress() 
 {
     var addressModel = require('../models/addressModel');
-    var address = new addressModel('./db/geocode');
+    var address = new addressModel('./db/geocode.sqlite3');
 
     this.findByAddress = (req,res) => {
         // find by a full address
         address.getAddress(req.body.address, (result) => {
-            
+            if(result) {
+                res.status(200).json(result);
+            } else {
+                res.writeHead(404);
+            }
+
         });
-        res.send('Find by full address called');
     }
 
     this.findByCounty = (req,res) => {
@@ -24,7 +28,6 @@ function newaddress()
                 res.status(404);
             }
 
-            
         });
     }
 
@@ -32,7 +35,6 @@ function newaddress()
         // find by a given townland
         let townland = req.params.townland_name;
         address.getTownland(townland, (result)=>{
-            
             res.status(200).json(result);
         });
         

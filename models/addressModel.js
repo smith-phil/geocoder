@@ -82,17 +82,31 @@ function newdb (pathToDb) {
      * Args: 
     */
     this.getAddress = (address, callback) => {
+        console.log('geaddress');
         // split the address taking care of special characters like (, periods and ) are removed
         var addElems = address.replace(/[.)]/g, "").replace("(",",").split(",");
-        
+        console.log(addElems);
         // get the county first, in a production ready application this would have to be validated
-        var county = addElems[addElems.length - 1]
+        var county = addElems[addElems.length - 1].trim();
         var notFound = true;
         var i = 0;
         // for townland I'm taking a top down approach as this is more likely to give me a unique record
         for(let i = 0; i < addElems.length - 1; i++) {
-            var townland = addElems[i];
-            
+            console.log(i);
+            var townland = addElems[i].trim();
+            var query = `select Y AS latitude,X as longitude, t.English_Name as 'Townland', cty.County from Centroid c 
+            join CentroidTownland ct on c.CentroidId = ct.CentroidId 
+            join Townland t on t.TownlandId = ct.TownlandId
+            join County cty on t.CountyId = cty.CountyId
+            where t.English_Name = '${townland.toUpperCase()}'
+            and cty.County = '${county.toUpperCase()}'
+            order by cty.County`;
+            console.log(query)
+            var found = false;
+            executeAll(query, callback);
+            if(found) {
+                break;
+            }
         }
     }
 
