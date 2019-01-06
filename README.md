@@ -17,7 +17,7 @@ Geocodes Irish addresses. Irish addresses have only recently being given a post 
 The entry point into the program is index.js. The basic structure follows the Model-View-Controller design pattern, but without the views as this is an API. The end points provided are:
  - http://&lt;hostname&gt;:3000/api/county/:countyname - returns a json object with the coordinates [HTTP GET]
  - http://&lt;hostname&gt;:3000/api/townland/:townland - return a array of json objects with the coordinates for all townlands with the given name [HTTP GET]
- - http://&lt;hostname&gt;:3000/api/address/ - posts and application/x-www-form-urlencoded form, name is address and the value is the address as a single comma delimited string,     returns a JSON object with the coordingates of the address to the nearest townland
+ - http://&lt;hostname&gt;:3000/api/address/ - posts and application/x-www-form-urlencoded form, name is address and the value is the address as a single comma delimited string,     returns a JSON object with the coordingates of the address to the nearest townland [HTTP POST]
 
 In the project you have the following structure
  - contollers/address.js
