@@ -2,6 +2,7 @@
 
 function newdb (pathToDb) {
     
+    // initialize the database
     var sqlite = require('sqlite3').verbose();
     var opened = false;
     var db = new sqlite.Database(pathToDb, sqlite.OPEN_READONLY, (err) => {
@@ -19,7 +20,7 @@ function newdb (pathToDb) {
      * Function: executeGet
      * executes a given query against the db
      * Args: query - the query to execute  
-     *       callback - the callback method to pass the result set too
+     * Returns: A promise that resolves the address if found or an error if not
      * Notes: the result in this case will only be the first record
      */
     const executeGet = (query, callback) => {
@@ -30,6 +31,12 @@ function newdb (pathToDb) {
         });
     }
 
+    /*
+     * Function: getAllAsync
+     * Executes a given query against the db
+     * Args: query - the query to execute  
+     * Returns: A promise that resolves the address if found or an error if not
+     */
     const getAllAsync = function(query) {
         return new Promise((resolve, reject) => {
             db.serialize(()=>{
@@ -48,7 +55,7 @@ function newdb (pathToDb) {
      * Function: getCounty 
      * Return the coordinates for a given county name, this can be multiple coordinates 
      * Arguments: county - the county name
-     *            callback - the callback method to pass the result set too 
+     * Returns: A promise that resolves the address if found or an error if not    
     */
     this.getCounty = (county) => {
         return new Promise((resolve,reject)=> {
@@ -76,7 +83,7 @@ function newdb (pathToDb) {
      * function: getTownland
      * Return the coordinates for a given townland name
      * Args: townland - the townland name
-     *       
+     * Returns: A promise that resolves the address if found or an error if not      
      */
     this.getTownland = (townland) => {
         return new Promise((resolve,reject) => {
@@ -107,6 +114,9 @@ function newdb (pathToDb) {
      * Function: getAddress
      * Returns a json object with the coordinates for a given address, the townland name for those coords, and the county
      * Args: the address in question
+     * Returns: A promise that resolves the address if found or an error if not
+     * Notes: This method uses recursion to move through the different possible townlands
+     *          within the address
     */
     this.getAddress = (address) => {
         
@@ -148,7 +158,7 @@ function newdb (pathToDb) {
                     reject(error);
                 })
             }
-            selectTownland(0 );
+            selectTownland(0);
         })
     }
 

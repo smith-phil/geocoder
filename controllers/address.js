@@ -6,6 +6,11 @@ function newaddress()
     const addressModel = require('../models/addressModel');
     const address = new addressModel('./db/geocode.sqlite3');
 
+    /*
+     * function: findByAddress - handles requests for an address
+     * Returns: a JSON object representing the coordinates and the specific townland, plus the county
+     *          or a 404 - not Found error if the address isn't found
+     */
     this.findByAddress = (req,res) => {
         
         address.getAddress(req.body.address)
@@ -21,6 +26,11 @@ function newaddress()
             })
     }
 
+    /*
+     * function: findByCounty - handles requests for a given county
+     * Returns: a JSON object representing the coordinates and the specific county 
+     *          or a 404 - not Found error if the address isn't found
+     */
     this.findByCounty = (req,res) => {
         // find by a county   
         const county = req.params.county_name;
@@ -36,6 +46,13 @@ function newaddress()
                 }
             })
     }
+
+    /*
+     * function: findByTownland - handles requests for an townland name
+     * Returns: a JSON object representing the coordinates and the specific townland, plus the county
+     *          or a 404 - not Found error if the address isn't found
+     * Note: More than one townland may be found in the database
+     */
 
     this.findByTownland = (req,res) => {
         // find by a given townland
